@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Budget">
+<meta name="theme-color" content="#f4f2ee">
+<title>Budget FCFA · EUR</title>
+<style>
+:root{--bg:#f4f2ee;--card:#fff;--ink:#1d2421;--mute:#6b736f;--line:#e4e0d8;--acc:#0f5c4d;--acc2:#e3efe9;--bad:#b3261e;--good:#2e7d4f;--warn:#fff4e0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body.noscroll{overflow:hidden}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(env(safe-area-inset-top) + 10px) 16px 6px;display:flex;align-items:center;justify-content:space-between}
+header.top h1{font-size:22px;margin:0}
+.rate{font-size:12px;color:var(--mute);background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px 9px}
+main{padding:0 12px calc(96px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.card h2{font-size:15px;margin:0 0 8px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+.nav{display:flex;align-items:center;justify-content:space-between;margin:6px 0}
+.nav b{font-size:18px;text-transform:capitalize}
+.nav button{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:22px;color:var(--ink)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi.wide{grid-column:1/-1}
+.kpi .l{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+.cfa{display:block;font-weight:650;font-size:17px;font-variant-numeric:tabular-nums}
+.kpi.wide .cfa{font-size:24px}
+.eur{display:block;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.sub{font-size:12px;color:var(--mute);margin-top:3px}
+.pos .cfa{color:var(--good)}.neg .cfa{color:var(--bad)}
+.crow{padding:8px 0;border-top:1px solid var(--line)}
+.crow:first-of-type{border-top:0}
+.crow .h{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.crow .h span:last-child{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.crow small{color:var(--mute);font-size:12px}
+.bar{height:6px;background:#eeebe5;border-radius:3px;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.bar.over i{background:var(--bad)}
+.op{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.op:first-of-type{border-top:0}
+.op .ol{font-size:15px}.op .os{font-size:12px;color:var(--mute)}
+.op .oa{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.op .oa small{display:block;font-weight:400;color:var(--mute);font-size:12px}
+.oa.revenu{color:var(--good)}
+.empty{color:var(--mute);font-size:14px;text-align:center;padding:10px}
+.link{background:none;border:0;color:var(--acc);font-size:14px;padding:6px 0;font-weight:600}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;font-size:15px;color:var(--ink)}
+.btn.primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn.danger{color:var(--bad)}
+.btn.full{width:100%;margin-top:8px}
+.banner{background:var(--warn);border:1px solid #f0d9a8;border-radius:12px;padding:10px 12px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin:10px 0}
+.brow{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid var(--line);font-size:15px}
+.brow:first-of-type{border-top:0}
+.brow span:last-child{font-variant-numeric:tabular-nums;color:var(--mute)}
+.brow.open span:first-child{font-weight:650}
+.bedit{background:#faf9f6;border-radius:10px;padding:10px;margin-bottom:8px}
+.grid12{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.grid12 label{font-size:11px;color:var(--mute)}
+.grid12 input{width:100%;padding:8px 6px;border:1px solid var(--line);border-radius:8px;font-size:16px;font-variant-numeric:tabular-nums}
+.tool{display:flex;gap:6px;margin-top:8px}
+.tool input{flex:1;min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+.tool .btn{padding:8px 10px;font-size:14px;white-space:nowrap}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:13px;margin-top:8px}
+.mgrid div{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.mgrid .n{color:var(--bad)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:8px 12px;font-size:14px;color:var(--mute)}
+.seg button.on{background:var(--acc);color:#fff}
+.field{display:block;margin:10px 0;font-size:13px;color:var(--mute)}
+.field input,.field select{display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff;color:var(--ink)}
+.amt{display:flex;gap:8px;align-items:center;margin-top:4px}
+.amt input{flex:1;min-width:0;margin:0;font-size:22px;font-variant-numeric:tabular-nums}
+.conv{font-size:14px;color:var(--mute);min-height:20px}
+.row2{display:flex;gap:8px}.row2>*{flex:1;min-width:0}
+.chk{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--ink);padding:4px 0}
+.chk input{width:20px;height:20px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.tbl th{font-weight:600;color:var(--mute);text-align:right;padding:4px 2px;font-size:11px}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{text-align:right;padding:5px 2px;border-top:1px solid var(--line)}
+.tbl .n{color:var(--bad)}
+.tbl tfoot td{font-weight:650}
+.goal .h{display:flex;justify-content:space-between;align-items:baseline}
+.goal .h b{font-size:17px}
+.goal p{margin:6px 0;font-size:14px}
+.muted{color:var(--mute);font-size:13px}
+.fab{position:fixed;right:18px;bottom:calc(76px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--acc);color:#fff;font-size:32px;line-height:1;border:0;box-shadow:0 4px 14px rgba(0,0,0,.22);z-index:9}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;border:0;background:none;padding:8px 0 7px;font-size:11px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.tabs button span{font-size:19px;line-height:1}
+nav.tabs button.on{color:var(--acc);font-weight:650}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20;display:flex;align-items:flex-end}
+.sheet[hidden]{display:none}
+.sheet-in{background:#fff;width:100%;max-width:640px;margin:0 auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.sheet-in h3{margin:0 0 4px;font-size:19px}
+.btns{display:flex;gap:8px;margin-top:14px}.btns .btn{flex:1}
+#toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1d2421;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:30;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88vw;text-align:center}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="top"><h1 id="title">Budget</h1><span class="rate">1 € = 655,957 FCFA</span></header>
+<main id="main"></main>
+<button class="fab" id="fab" data-act="add" aria-label="Ajouter une opération">+</button>
+<nav class="tabs">
+  <button data-act="tab" data-tab="mois"><span>◐</span>Mois</button>
+  <button data-act="tab" data-tab="budget"><span>▦</span>Budget</button>
+  <button data-act="tab" data-tab="epargne"><span>◎</span>Épargne</button>
+  <button data-act="tab" data-tab="simu"><span>⇅</span>Et si…</button>
+  <button data-act="tab" data-tab="reglages"><span>⚙</span>Réglages</button>
+</nav>
+<div class="sheet" id="sheet" hidden><div class="sheet-in"></div></div>
+<input type="file" id="imp" accept="application/json,.json" hidden>
+<div id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+/* ---------- Constantes ---------- */
+const RATE = 655.957; // parité fixe FCFA / EUR
+const MS = ['Janv.','Févr.','Mars','Avr.','Mai','Juin','Juil.','Août','Sept.','Oct.','Nov.','Déc.'];
+const ML = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const KEY = 'budget-fcfa-eur';
+const GROUPS = [['revenu','Revenus'],['epargne','Épargne'],['courant','Charges courantes'],['enfants','Enfants'],['ponctuel','Ponctuelles']];
+const GNAME = Object.fromEntries(GROUPS);
+
+/* ---------- Utilitaires ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+const nfCFA = new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0});
+const nfEUR = new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fCFA = v => nfCFA.format(Math.round(v)) + ' FCFA';
+const fEUR = v => nfEUR.format(v) + ' €';
+const fIn = (v,cur) => cur === 'EUR' ? fEUR(v) : fCFA(v);
+const toCFA = (a,cur) => cur === 'EUR' ? a * RATE : a;
+const fromCFA = (v,cur) => cur === 'EUR' ? v / RATE : v;
+const both = v => `<span class="cfa">${fCFA(v)}</span><span class="eur">${fEUR(v / RATE)}</span>`;
+const otherCur = (a,cur) => cur === 'EUR' ? fCFA(a * RATE) : fEUR(a / RATE);
+const num = s => { s = String(s ?? '').replace(/[\s  ]/g,'').replace(',','.'); const n = parseFloat(s); return isFinite(n) ? n : 0; };
+const round = (v,cur) => cur === 'EUR' ? Math.round(v * 100) / 100 : Math.round(v);
+const now = new Date();
+const TY = now.getFullYear(), TM = now.getMonth();
+const isoToday = `${TY}-${pad(TM+1)}-${pad(now.getDate())}`;
+
+/* ---------- Données ---------- */
+function defaultState(){
+  const c = (id,name,group,cur) => ({id,name,group,cur});
+  const cats = [
+    c('salaire','Salaire','revenu','CFA'), c('autres-rev','Autres revenus','revenu','CFA'),
+    c('ep-fr','Épargne FR','epargne','EUR'), c('ep-bj','Épargne BJ','epargne','CFA'),
+    c('charges-fr','Charges FR','courant','EUR'), c('midi','Bouffe midi boulot','courant','CFA'),
+    c('nourriture','Nourriture','courant','CFA'), c('nettoyage','Nettoyage maison','courant','CFA'),
+    c('tel','Forfait téléphone','courant','CFA'), c('gozem','Gozem','courant','CFA'),
+    c('elec','Électricité','courant','CFA'), c('essence','Essence','courant','CFA'),
+    c('gaz','Gaz','courant','CFA'), c('internet','Internet','courant','CFA'),
+    c('frais','Frais bancaires et western','courant','CFA'), c('perso','Besoin perso','courant','CFA'),
+    c('coiffure','Coiffure enfants','enfants','CFA'), c('ecole-c','École C','enfants','CFA'),
+    c('creche-i','Crèche I','enfants','CFA'), c('cantine-c','Cantine C','enfants','CFA'),
+    c('cantine-i','Cantine I','enfants','CFA'), c('piscine-i','Piscine I','enfants','CFA'),
+    c('activites-c','Activités C','enfants','CFA'),
+    c('anniv','Anniversaire','ponctuel','CFA'), c('cadeaux','Cadeaux','ponctuel','CFA')
+  ];
+  const budgets = {};
+  [TY, TY+1].forEach(y => budgets[y] = { midi: {cur:'CFA', m: Array(12).fill(80000)} });
+  return {v:1, cats, tx:[], budgets, goals:[], sim:{}, lastExport:null, lastCat:'nourriture'};
+}
+let S;
+function load(){
+  try { const raw = localStorage.getItem(KEY); S = raw ? JSON.parse(raw) : defaultState(); }
+  catch(e){ S = defaultState(); }
+  S.cats = S.cats || []; S.tx = S.tx || []; S.budgets = S.budgets || {}; S.goals = S.goals || []; S.sim = S.sim || {};
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){ toast("Enregistrement impossible sur cet appareil. Exporte une sauvegarde."); }
+}
+let saveTimer; const saveSoon = () => { clearTimeout(saveTimer); saveTimer = setTimeout(save, 300); };
+
+const cat = id => S.cats.find(c => c.id === id);
+const kind = c => c.group === 'revenu' ? 'revenu' : (c.group === 'epargne' ? 'epargne' : 'depense');
+function getB(y,id){
+  S.budgets[y] = S.budgets[y] || {};
+  if (!S.budgets[y][id]) S.budgets[y][id] = {cur: (cat(id)||{}).cur || 'CFA', m: Array(12).fill(0)};
+  return S.budgets[y][id];
+}
+const bud = (y,m,id) => { const b = S.budgets[y] && S.budgets[y][id]; return b ? toCFA(b.m[m] || 0, b.cur) : 0; };
+const budYearHas = y => !!S.budgets[y] && Object.values(S.budgets[y]).some(b => b.m.some(v => v));
+
+/* ---------- État de l'écran ---------- */
+const ui = {tab:'mois', y:TY, m:TM, by:TY, sy:TY, showAll:false, open:null};
+
+/* ---------- Rendu général ---------- */
+const TITLES = {mois:'Budget', budget:'Budget annuel', epargne:'Épargne', simu:'Et si…', reglages:'Réglages'};
+function render(){
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  $('#fab').hidden = ui.tab !== 'mois';
+  $('#title').textContent = TITLES[ui.tab];
+  $('#main').innerHTML = ({mois:renderMois, budget:renderBudget, epargne:renderEpargne, simu:renderSimu, reglages:renderReglages})[ui.tab]();
+}
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600); }
+function seg(id, value, opts, extra=''){
+  return `<input type="hidden" id="${id}" value="${value}" ${extra}><div class="seg" data-for="${id}">` +
+    opts.map(([v,l]) => `<button type="button" data-act="seg" data-v="${v}" class="${v===value?'on':''}">${l}</button>`).join('') + '</div>';
+}
+const CURS = [['CFA','FCFA'],['EUR','EUR']];
+function catOptions(sel){
+  return GROUPS.map(([g,l]) => {
+    const cs = S.cats.filter(c => c.group === g); if (!cs.length) return '';
+    return `<optgroup label="${l}">` + cs.map(c => `<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.name)}</option>`).join('') + '</optgroup>';
+  }).join('');
+}
+const monthOpts = sel => MS.map((n,i) => `<option value="${i}" ${+sel===i?'selected':''}>${n}</option>`).join('');
+function sheet(html){ const s = $('#sheet'); s.querySelector('.sheet-in').innerHTML = html; s.hidden = false; document.body.classList.add('noscroll'); }
+function closeSheet(){ $('#sheet').hidden = true; document.body.classList.remove('noscroll'); }
+function setSeg(id, v){
+  const h = document.getElementById(id); if (h) h.value = v;
+  document.querySelectorAll(`.seg[data-for="${id}"] button`).forEach(b => b.classList.toggle('on', b.dataset.v === v));
+}
+
+/* ---------- Onglet Mois ---------- */
+function monthData(y,m){
+  const pre = `${y}-${pad(m+1)}`;
+  const txs = S.tx.filter(t => t.date.slice(0,7) === pre);
+  const real = {};
+  txs.forEach(t => real[t.cat] = (real[t.cat] || 0) + toCFA(t.amount, t.cur));
+  const T = {rev:0, dep:0, ep:0, bRev:0, bDep:0, bEp:0};
+  S.cats.forEach(c => {
+    const k = kind(c), r = real[c.id] || 0, b = bud(y,m,c.id);
+    if (k === 'revenu'){ T.rev += r; T.bRev += b; }
+    else { T.dep += r; T.bDep += b; if (k === 'epargne'){ T.ep += r; T.bEp += b; } }
+  });
+  return {txs, real, T};
+}
+function backupBanner(){
+  if (!S.tx.length) return '';
+  const days = S.lastExport ? (Date.now() - new Date(S.lastExport).getTime()) / 864e5 : Infinity;
+  if (days < 30) return '';
+  return `<div class="banner"><span>${S.lastExport ? 'Dernière sauvegarde il y a plus de 30 jours.' : 'Aucune sauvegarde exportée pour l’instant.'}</span><button class="btn" data-act="export">Exporter</button></div>`;
+}
+function renderMois(){
+  const {y,m} = ui, {txs, real, T} = monthData(y,m);
+  const solde = T.rev - T.dep;
+  let h = `<div class="nav"><button data-act="mprev">‹</button><b>${ML[m]} ${y}</b><button data-act="mnext">›</button></div>` + backupBanner();
+  h += `<div class="kpis">
+    <div class="kpi wide ${solde>=0?'pos':'neg'}"><div class="l">Solde du mois</div>${both(solde)}<div class="sub">Prévu : ${fCFA(T.bRev - T.bDep)} · ${fEUR((T.bRev - T.bDep)/RATE)}</div></div>
+    <div class="kpi"><div class="l">Revenus</div>${both(T.rev)}<div class="sub">Prévu ${fCFA(T.bRev)}</div></div>
+    <div class="kpi"><div class="l">Dépenses <small>(épargne incl.)</small></div>${both(T.dep)}<div class="sub">Budget ${fCFA(T.bDep)}</div></div>
+    <div class="kpi"><div class="l">Dont épargne</div>${both(T.ep)}<div class="sub">Prévu ${fCFA(T.bEp)}</div></div>
+    <div class="kpi ${T.bDep - T.dep >= 0 ? '' : 'neg'}"><div class="l">Reste à dépenser</div>${T.bDep ? both(T.bDep - T.dep) : '<span class="sub">Pas de budget ce mois</span>'}</div>
+  </div>`;
+  GROUPS.forEach(([g,l]) => {
+    const rows = S.cats.filter(c => c.group === g).map(c => {
+      const r = real[c.id] || 0, b = bud(y,m,c.id);
+      if (!ui.showAll && !r && !b) return '';
+      const rc = fromCFA(r, c.cur), bc = fromCFA(b, c.cur);
+      const pct = b > 0 ? Math.min(100, r / b * 100) : (r > 0 ? 100 : 0);
+      const over = kind(c) === 'depense' && r > b + 0.5;
+      return `<div class="crow"><div class="h"><span>${esc(c.name)}</span><span>${fIn(rc,c.cur)}${b?` <small>/ ${fIn(bc,c.cur)}</small>`:''}</span></div>
+        <div class="bar ${over?'over':''}"><i style="width:${pct}%"></i></div></div>`;
+    }).join('');
+    if (rows) h += `<div class="card"><h2>${l}</h2>${rows}</div>`;
+  });
+  h += `<button class="link" data-act="all">${ui.showAll ? 'Masquer les catégories vides' : 'Afficher toutes les catégories'}</button>`;
+  const list = txs.slice().sort((a,b) => b.date.localeCompare(a.date) || (b.ts||0) - (a.ts||0)).map(t => {
+    const c = cat(t.cat) || {name:'?', group:'courant'};
+    const k = kind(c);
+    return `<div class="op" data-act="edit" data-id="${t.id}"><div><div class="ol">${esc(t.label || c.name)}</div><div class="os">${t.date.slice(8,10)}/${t.date.slice(5,7)} · ${esc(c.name)}</div></div>
+      <div class="oa ${k}">${k==='revenu'?'+':'−'}${fIn(t.amount,t.cur)}<small>${otherCur(t.amount,t.cur)}</small></div></div>`;
+  }).join('');
+  h += `<div class="card"><h2>Opérations (${txs.length})</h2>${list || '<div class="empty">Aucune opération ce mois-ci. Touche + pour en ajouter.</div>'}</div>`;
+  return h;
+}
+let manualCur = false;
+function openOp(id){
+  const t = id ? S.tx.find(x => x.id === id) : null;
+  const defDate = t ? t.date : (ui.y === TY && ui.m === TM ? isoToday : `${ui.y}-${pad(ui.m+1)}-01`);
+  const cid = t ? t.cat : (cat(S.lastCat) ? S.lastCat : S.cats[0].id);
+  const cur = t ? t.cur : cat(cid).cur;
+  manualCur = !!t;
+  sheet(`<h3>${t ? 'Modifier l’opération' : 'Nouvelle opération'}</h3>
+    <label class="field">Catégorie<select id="f-cat">${catOptions(cid)}</select></label>
+    <label class="field">Montant<div class="amt"><input id="f-amt" inputmode="decimal" placeholder="0" value="${t ? t.amount : ''}">${seg('f-cur', cur, CURS)}</div></label>
+    <div class="conv" id="f-conv"></div>
+    <label class="field">Date<input type="date" id="f-date" value="${defDate}"></label>
+    <label class="field">Libellé (facultatif)<input id="f-lab" value="${esc(t ? t.label : '')}" placeholder="ex. marché Dantokpa"></label>
+    <div class="btns">${t ? `<button class="btn danger" data-act="opdel" data-id="${t.id}">Supprimer</button>` : ''}<button class="btn" data-act="close">Annuler</button><button class="btn primary" data-act="opsave" data-id="${t ? t.id : ''}">Enregistrer</button></div>`);
+  updConv();
+  if (!t) setTimeout(() => $('#f-amt').focus(), 50);
+}
+function updConv(){
+  const a = num($('#f-amt').value), cur = $('#f-cur').value;
+  $('#f-conv').textContent = a ? '= ' + otherCur(a, cur) : '';
+}
+function saveOp(id){
+  const amount = num($('#f-amt').value), date = $('#f-date').value, c = $('#f-cat').value;
+  if (amount <= 0) return toast('Indique un montant.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return toast('Indique une date.');
+  const rec = {id: id || uid(), date, amount, cur: $('#f-cur').value, cat: c, label: $('#f-lab').value.trim(), ts: Date.now()};
+  if (id){ const i = S.tx.findIndex(x => x.id === id); S.tx[i] = rec; } else S.tx.push(rec);
+  S.lastCat = c; save(); closeSheet();
+  ui.y = +date.slice(0,4); ui.m = +date.slice(5,7) - 1; render();
+  toast('Enregistré');
+}
+
+/* ---------- Onglet Budget ---------- */
+function yearTotals(y){
+  const months = [];
+  let rev = 0, dep = 0, ep = 0;
+  for (let m = 0; m < 12; m++){
+    let r = 0, d = 0;
+    S.cats.forEach(c => { const b = bud(y,m,c.id); if (kind(c) === 'revenu') r += b; else { d += b; if (kind(c) === 'epargne') ep += b; } });
+    rev += r; dep += d; months.push(r - d);
+  }
+  return {rev, dep, ep, months};
+}
+function renderBsum(y){
+  const T = yearTotals(y), s = T.rev - T.dep;
+  return `<div class="kpis" style="margin:0">
+    <div class="kpi wide ${s>=0?'pos':'neg'}"><div class="l">Solde prévu sur l’année</div>${both(s)}</div>
+    <div class="kpi"><div class="l">Revenus prévus</div>${both(T.rev)}</div>
+    <div class="kpi"><div class="l">Dépenses prévues</div>${both(T.dep)}<div class="sub">dont épargne ${fCFA(T.ep)}</div></div>
+  </div>
+  <div class="muted" style="margin-top:10px">Solde prévu par mois (FCFA)</div>
+  <div class="mgrid">${T.months.map((v,i) => `<div class="${v<0?'n':''}"><span>${MS[i]}</span><span>${nfCFA.format(Math.round(v))}</span></div>`).join('')}</div>`;
+}
+function renderBudget(){
+  const y = ui.by;
+  let h = `<div class="nav"><button data-act="bprev">‹</button><b>${y}</b><button data-act="bnext">›</button></div>`;
+  h += `<div class="card" id="bsum">${renderBsum(y)}</div>`;
+  if (S.budgets[y-1] && budYearHas(y-1)) h += `<button class="link" data-act="bcopy">Copier le budget ${y-1} dans ${y}</button>`;
+  h += `<p class="muted">Touche une catégorie pour saisir ses montants mois par mois. Chaque mois peut être différent.</p>`;
+  GROUPS.forEach(([g,l]) => {
+    const rows = S.cats.filter(c => c.group === g).map(c => {
+      const b = S.budgets[y] && S.budgets[y][c.id];
+      const cur = b ? b.cur : c.cur;
+      const tot = b ? b.m.reduce((a,v) => a + (v||0), 0) : 0;
+      let r = `<div class="brow ${ui.open===c.id?'open':''}" data-act="bopen" data-cat="${c.id}"><span>${esc(c.name)}</span><span data-btot="${c.id}">${tot ? fIn(tot,cur) + ' / an' : '—'}</span></div>`;
+      if (ui.open === c.id){
+        const bb = getB(y, c.id);
+        r += `<div class="bedit">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="muted">Devise du budget</span>${seg('bcur-'+c.id, bb.cur, CURS, `data-bcur="${c.id}"`)}</div>
+          <div class="grid12">${bb.m.map((v,i) => `<label>${MS[i]}<input inputmode="decimal" data-bm="${i}" data-cat="${c.id}" value="${v || ''}" placeholder="0"></label>`).join('')}</div>
+          <div class="tool"><input id="t-same" inputmode="decimal" placeholder="Montant mensuel"><button class="btn" data-act="bsame" data-cat="${c.id}">Chaque mois</button></div>
+          <div class="tool"><input id="t-year" inputmode="decimal" placeholder="Total annuel"><button class="btn" data-act="bsplit" data-cat="${c.id}">Répartir sur 12</button></div>
+        </div>`;
+      }
+      return r;
+    }).join('');
+    h += `<div class="card"><h2>${l}</h2>${rows}</div>`;
+  });
+  return h;
+}
+
+/* ---------- Onglet Épargne ---------- */
+function epCum(){
+  const r = {};
+  S.tx.forEach(t => { const c = cat(t.cat); if (c && kind(c) === 'epargne') r[t.cat] = (r[t.cat] || 0) + toCFA(t.amount, t.cur); });
+  return r;
+}
+function epAvg3(ids){
+  let s = 0;
+  for (let k = 1; k <= 3; k++){
+    let y = TY, m = TM - k; while (m < 0){ m += 12; y--; }
+    const pre = `${y}-${pad(m+1)}`;
+    S.tx.forEach(t => { if (t.date.slice(0,7) === pre && ids.includes(t.cat)) s += toCFA(t.amount, t.cur); });
+  }
+  return s / 3;
+}
+function labelIn(n){ let m = TM + n, y = TY + Math.floor(m / 12); m = ((m % 12) + 12) % 12; return `${ML[m]} ${y}`; }
+function monthsTo(reste, per){ if (reste <= 0) return 0; if (per <= 0) return null; return Math.ceil(reste / per); }
+function reachTxt(n){ if (n === 0) return '<b>objectif atteint</b>'; if (n == null) return '—'; return `dans ${n} mois (${labelIn(n)})`; }
+function goalStat(g){
+  const cum = epCum();
+  const have = toCFA(g.initial || 0, g.cur) + (g.cats || []).reduce((s,c) => s + (cum[c] || 0), 0);
+  const tgt = toCFA(g.target, g.cur);
+  return {have, tgt, reste: Math.max(0, tgt - have), avg: epAvg3(g.cats || [])};
+}
+function renderEpargne(){
+  const cum = epCum(), epCats = S.cats.filter(c => kind(c) === 'epargne');
+  const total = epCats.reduce((s,c) => s + (cum[c.id] || 0), 0);
+  let h = `<div class="kpis"><div class="kpi wide"><div class="l">Épargne cumulée (saisie dans l’app)</div>${both(total)}<div class="sub">Moyenne des 3 derniers mois : ${fCFA(epAvg3(epCats.map(c=>c.id)))} / mois</div></div>`;
+  epCats.forEach(c => { h += `<div class="kpi"><div class="l">${esc(c.name)}</div>${both(cum[c.id] || 0)}</div>`; });
+  h += `</div><div class="card"><h2>Objectifs</h2>`;
+  if (!S.goals.length) h += `<div class="empty">Aucun objectif. Exemple : « Voyage France », 1 500 € pour décembre 2027.</div>`;
+  S.goals.forEach(g => {
+    const st = goalStat(g), pct = st.tgt ? Math.min(100, st.have / st.tgt * 100) : 0;
+    let dl = '';
+    if (g.deadline){
+      const [dy,dm] = g.deadline.split('-').map(Number), left = (dy - TY) * 12 + (dm - 1 - TM);
+      dl = left > 0 ? `<p>Pour ${ML[dm-1]} ${dy} : il faut <b>${fIn(fromCFA(st.reste / left, g.cur), g.cur)}</b> / mois (${left} mois).</p>` : `<p class="muted">Échéance ${ML[dm-1]} ${dy} atteinte ou dépassée.</p>`;
+    }
+    h += `<div class="goal crow"><div class="h"><b>${esc(g.name)}</b><button class="link" data-act="goaledit" data-id="${g.id}">Modifier</button></div>
+      <div>${fIn(fromCFA(st.have,g.cur),g.cur)} <span class="muted">/ ${fIn(g.target,g.cur)} · ${otherCur(g.target,g.cur)}</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <p>Reste : <b>${fIn(fromCFA(st.reste,g.cur),g.cur)}</b> <span class="muted">(${otherCur(fromCFA(st.reste,g.cur),g.cur)})</span></p>
+      <p>Au rythme des 3 derniers mois (${fIn(fromCFA(st.avg,g.cur),g.cur)}/mois) : ${st.avg > 0 || st.reste <= 0 ? reachTxt(monthsTo(st.reste, st.avg)) : 'pas de versement récent.'}</p>
+      ${dl}
+      <div class="tool"><input inputmode="decimal" data-gsim="${g.id}" placeholder="Si je mets… par mois (${g.cur==='EUR'?'€':'FCFA'})"></div>
+      <p id="gsr-${g.id}" class="muted"></p></div>`;
+  });
+  h += `<button class="btn full" data-act="goaladd">+ Nouvel objectif</button></div>`;
+  return h;
+}
+function openGoal(id){
+  const g = id ? S.goals.find(x => x.id === id) : {name:'', target:'', cur:'CFA', deadline:'', initial:'', cats: S.cats.filter(c => kind(c)==='epargne').map(c => c.id)};
+  sheet(`<h3>${id ? 'Modifier l’objectif' : 'Nouvel objectif'}</h3>
+    <label class="field">Nom<input id="g-name" value="${esc(g.name)}" placeholder="ex. Voyage France"></label>
+    <label class="field">Montant cible<div class="amt"><input id="g-target" inputmode="decimal" value="${g.target || ''}" placeholder="0">${seg('g-cur', g.cur, CURS)}</div></label>
+    <label class="field">Déjà épargné hors application (même devise)<input id="g-init" inputmode="decimal" value="${g.initial || ''}" placeholder="0"></label>
+    <label class="field">Échéance (facultatif)<input type="month" id="g-dl" value="${g.deadline || ''}"></label>
+    <div class="field">Catégories d’épargne qui alimentent cet objectif
+      ${S.cats.filter(c => kind(c)==='epargne').map(c => `<label class="chk"><input type="checkbox" data-gcat value="${c.id}" ${(g.cats||[]).includes(c.id)?'checked':''}>${esc(c.name)}</label>`).join('')}</div>
+    <div class="btns">${id ? `<button class="btn danger" data-act="goaldel" data-id="${id}">Supprimer</button>` : ''}<button class="btn" data-act="close">Annuler</button><button class="btn primary" data-act="goalsave" data-id="${id||''}">Enregistrer</button></div>`);
+}
+function saveGoal(id){
+  const target = num($('#g-target').value);
+  if (target <= 0) return toast('Indique un montant cible.');
+  const g = {id: id || uid(), name: $('#g-name').value.trim() || 'Objectif', target, cur: $('#g-cur').value,
+    initial: num($('#g-init').value), deadline: $('#g-dl').value || '',
+    cats: [...document.querySelectorAll('[data-gcat]:checked')].map(x => x.value)};
+  if (id) S.goals[S.goals.findIndex(x => x.id === id)] = g; else S.goals.push(g);
+  save(); closeSheet(); render();
+}
+
+/* ---------- Onglet Et si… ---------- */
+function simDefaults(){
+  const s = S.sim, rev = S.cats.filter(c => kind(c) === 'revenu');
+  if (!s.cat || !cat(s.cat)) s.cat = rev.length ? rev[0].id : '';
+  if (s.cur == null) s.cur = 'CFA';
+  if (s.from == null) s.from = 0;
+  if (s.xcur == null) s.xcur = 'EUR';
+  if (s.xfrom == null) s.xfrom = 0;
+  if (s.xto == null) s.xto = 11;
+  if (s.pct == null) s.pct = '100';
+  return s;
+}
+function renderSimu(){
+  const s = simDefaults(), rev = S.cats.filter(c => kind(c) === 'revenu');
+  let h = `<div class="nav"><button data-act="sprev">‹</button><b>${ui.sy}</b><button data-act="snext">›</button></div>
+  <p class="muted">Simulation sur les revenus, à partir de ton budget annuel. Ton budget réel n’est pas modifié.</p>
+  <div class="card"><h2>Changer un revenu</h2>
+    <label class="field">Revenu concerné<select data-sim="cat">${rev.map(c => `<option value="${c.id}" ${c.id===s.cat?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+    <label class="field">Nouveau montant mensuel (vide = inchangé)<div class="amt"><input data-sim="amt" inputmode="decimal" value="${esc(s.amt || '')}" placeholder="ex. 900000">${seg('s-cur', s.cur, CURS, 'data-sim="cur"')}</div></label>
+    <label class="field">À partir de<select data-sim="from">${monthOpts(s.from)}</select></label>
+  </div>
+  <div class="card"><h2>Ajouter un revenu</h2>
+    <label class="field">Montant mensuel supplémentaire<div class="amt"><input data-sim="xamt" inputmode="decimal" value="${esc(s.xamt || '')}" placeholder="ex. mission en France">${seg('s-xcur', s.xcur, CURS, 'data-sim="xcur"')}</div></label>
+    <div class="row2"><label class="field">De<select data-sim="xfrom">${monthOpts(s.xfrom)}</select></label><label class="field">À<select data-sim="xto">${monthOpts(s.xto)}</select></label></div>
+  </div>
+  <div class="card"><h2>Épargne</h2>
+    <label class="field">Part du gain mise en épargne (%)<input data-sim="pct" inputmode="decimal" value="${esc(s.pct)}"></label>
+    <label class="field">Objectif à projeter<select data-sim="goal"><option value="">— aucun —</option>${S.goals.map(g => `<option value="${g.id}" ${g.id===s.goal?'selected':''}>${esc(g.name)}</option>`).join('')}</select></label>
+  </div>
+  <div id="simres">${renderSimRes()}</div>`;
+  return h;
+}
+function renderSimRes(){
+  const s = simDefaults(), y = ui.sy;
+  if (!budYearHas(y)) return `<div class="card"><div class="empty">Aucun budget saisi pour ${y}. Commence par l’onglet Budget.</div></div>`;
+  const rows = []; let bT = 0, sT = 0, dT = 0;
+  const amtSet = String(s.amt ?? '').trim() !== '';
+  for (let m = 0; m < 12; m++){
+    let base = 0, dep = 0;
+    S.cats.forEach(c => { const b = bud(y,m,c.id); if (kind(c) === 'revenu') base += b; else dep += b; });
+    let sim = base;
+    if (amtSet && m >= +s.from) sim = sim - bud(y,m,s.cat) + toCFA(num(s.amt), s.cur);
+    if (num(s.xamt) > 0 && m >= +s.xfrom && m <= +s.xto) sim += toCFA(num(s.xamt), s.xcur);
+    rows.push({base, sim, dep}); bT += base; sT += sim; dT += dep;
+  }
+  const diff = sT - bT, extraEp = diff * num(s.pct) / 100;
+  let h = `<div class="kpis">
+    <div class="kpi wide ${diff>=0?'pos':'neg'}"><div class="l">Écart de revenus sur l’année</div>${both(diff)}</div>
+    <div class="kpi"><div class="l">Solde annuel prévu</div>${both(bT - dT)}</div>
+    <div class="kpi ${sT-dT>=0?'pos':'neg'}"><div class="l">Solde annuel simulé</div>${both(sT - dT)}</div>
+    <div class="kpi wide"><div class="l">Épargne supplémentaire (${esc(s.pct)} %)</div>${both(extraEp)}<div class="sub">soit ${fCFA(extraEp/12)} · ${fEUR(extraEp/12/RATE)} par mois en moyenne</div></div>
+  </div>`;
+  const g = S.goals.find(x => x.id === s.goal);
+  if (g){
+    const st = goalStat(g);
+    h += `<div class="card"><h2>${esc(g.name)}</h2>
+      <p>Sans changement (${fIn(fromCFA(st.avg,g.cur),g.cur)}/mois) : ${st.avg > 0 || st.reste <= 0 ? reachTxt(monthsTo(st.reste, st.avg)) : 'pas de versement récent.'}</p>
+      <p>Avec la simulation (${fIn(fromCFA(st.avg + extraEp/12,g.cur),g.cur)}/mois) : ${reachTxt(monthsTo(st.reste, st.avg + extraEp/12))}</p></div>`;
+  }
+  h += `<div class="card"><h2>Mois par mois (FCFA)</h2><table class="tbl"><thead><tr><th>Mois</th><th>Revenus prévus</th><th>Revenus simulés</th><th>Solde simulé</th></tr></thead><tbody>` +
+    rows.map((r,i) => `<tr><td>${MS[i]}</td><td>${nfCFA.format(Math.round(r.base))}</td><td>${nfCFA.format(Math.round(r.sim))}</td><td class="${r.sim-r.dep<0?'n':''}">${nfCFA.format(Math.round(r.sim - r.dep))}</td></tr>`).join('') +
+    `</tbody><tfoot><tr><td>Total</td><td>${nfCFA.format(Math.round(bT))}</td><td>${nfCFA.format(Math.round(sT))}</td><td>${nfCFA.format(Math.round(sT - dT))}</td></tr></tfoot></table>
+    <p class="muted">Dépenses = celles de ton budget annuel ${y} (épargne prévue incluse).</p></div>`;
+  return h;
+}
+
+/* ---------- Onglet Réglages ---------- */
+function renderReglages(){
+  let h = '';
+  GROUPS.forEach(([g,l]) => {
+    h += `<div class="card"><h2>${l}</h2>` + S.cats.filter(c => c.group === g).map(c =>
+      `<div class="brow" data-act="catedit" data-cat="${c.id}"><span>${esc(c.name)}</span><span>${c.cur === 'EUR' ? 'EUR' : 'FCFA'} ›</span></div>`).join('') + `</div>`;
+  });
+  h += `<button class="btn full" data-act="catadd">+ Nouvelle catégorie</button>
+  <div class="card" style="margin-top:16px"><h2>Sauvegarde</h2>
+    <p class="muted">Tes données sont stockées uniquement sur ce téléphone, dans Safari. Exporte régulièrement un fichier de sauvegarde (dans Fichiers ou iCloud Drive).</p>
+    <p>Dernier export : <b>${S.lastExport ? new Date(S.lastExport).toLocaleDateString('fr-FR') : 'jamais'}</b> · ${S.tx.length} opérations</p>
+    <div class="btns"><button class="btn primary" data-act="export">Exporter</button><button class="btn" data-act="import">Importer</button></div></div>
+  <div class="card"><h2>Installation</h2><p class="muted">Dans Safari : bouton Partager → « Sur l’écran d’accueil ». L’application s’ouvre ensuite en plein écran.</p></div>
+  <div class="card"><h2>Conversion</h2><p class="muted">Parité fixe : 1 € = 655,957 FCFA. Les frais réels de transfert sont à saisir dans la catégorie dédiée.</p></div>
+  <button class="btn full danger" data-act="reset">Effacer toutes les données</button>`;
+  return h;
+}
+function openCat(id){
+  const c = id ? cat(id) : {name:'', group:'courant', cur:'CFA'};
+  const used = id ? S.tx.filter(t => t.cat === id).length : 0;
+  sheet(`<h3>${id ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
+    <label class="field">Nom<input id="c-name" value="${esc(c.name)}"></label>
+    <label class="field">Groupe<select id="c-group">${GROUPS.map(([g,l]) => `<option value="${g}" ${g===c.group?'selected':''}>${l}</option>`).join('')}</select></label>
+    <div class="field">Devise par défaut<div style="margin-top:4px">${seg('c-cur', c.cur, CURS)}</div></div>
+    ${used ? `<p class="muted">Utilisée par ${used} opération(s) : suppression impossible.</p>` : ''}
+    <div class="btns">${id && !used ? `<button class="btn danger" data-act="catdel" data-cat="${id}">Supprimer</button>` : ''}<button class="btn" data-act="close">Annuler</button><button class="btn primary" data-act="catsave" data-cat="${id||''}">Enregistrer</button></div>`);
+}
+function saveCat(id){
+  const name = $('#c-name').value.trim(); if (!name) return toast('Indique un nom.');
+  const rec = {id: id || uid(), name, group: $('#c-group').value, cur: $('#c-cur').value};
+  if (id) Object.assign(cat(id), rec); else S.cats.push(rec);
+  save(); closeSheet(); render();
+}
+async function doExport(){
+  const data = JSON.stringify(Object.assign({app:'budget-fcfa-eur', exported: new Date().toISOString()}, S));
+  const name = `budget-sauvegarde-${isoToday}.json`;
+  const file = new File([data], name, {type:'application/json'});
+  const mark = () => { S.lastExport = new Date().toISOString(); save(); render(); toast('Sauvegarde exportée'); };
+  try {
+    if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:name}); return mark(); }
+  } catch(e){ if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  mark();
+}
+function doImport(file){
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!Array.isArray(d.cats) || !Array.isArray(d.tx)) throw new Error('format');
+      if (!confirm(`Remplacer toutes les données actuelles par cette sauvegarde (${d.tx.length} opérations) ?`)) return;
+      delete d.app; delete d.exported; S = Object.assign(defaultState(), d); S.budgets = S.budgets || {}; S.goals = S.goals || []; S.sim = S.sim || {}; save(); render(); toast('Sauvegarde importée');
+    } catch(e){ toast('Fichier non reconnu.'); }
+  };
+  r.readAsText(file);
+}
+
+/* ---------- Événements ---------- */
+document.addEventListener('click', e => {
+  if (e.target.id === 'sheet') return closeSheet();
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id, c = el.dataset.cat;
+  switch (a){
+    case 'tab': ui.tab = el.dataset.tab; ui.open = null; render(); window.scrollTo(0,0); break;
+    case 'mprev': case 'mnext': ui.m += a === 'mprev' ? -1 : 1; if (ui.m < 0){ ui.m = 11; ui.y--; } if (ui.m > 11){ ui.m = 0; ui.y++; } render(); break;
+    case 'all': ui.showAll = !ui.showAll; render(); break;
+    case 'add': openOp(); break;
+    case 'edit': openOp(id); break;
+    case 'close': closeSheet(); break;
+    case 'opsave': saveOp(id); break;
+    case 'opdel': if (confirm('Supprimer cette opération ?')){ S.tx = S.tx.filter(t => t.id !== id); save(); closeSheet(); render(); } break;
+    case 'seg': {
+      const wrap = el.closest('.seg'), hid = wrap.dataset.for;
+      setSeg(hid, el.dataset.v);
+      document.getElementById(hid).dispatchEvent(new Event('input', {bubbles:true}));
+      break; }
+    case 'bprev': ui.by--; ui.open = null; render(); break;
+    case 'bnext': ui.by++; ui.open = null; render(); break;
+    case 'bopen': ui.open = ui.open === c ? null : c; render();
+      { const r = document.querySelector(`.brow[data-cat="${c}"]`); if (r && ui.open) r.scrollIntoView({block:'start', behavior:'smooth'}); } break;
+    case 'bsame': { const v = num($('#t-same').value), b = getB(ui.by, c); b.m = Array(12).fill(round(v, b.cur)); save(); render(); toast('Appliqué aux 12 mois'); break; }
+    case 'bsplit': {
+      const v = num($('#t-year').value), b = getB(ui.by, c), part = b.cur === 'EUR' ? Math.floor(v / 12 * 100) / 100 : Math.floor(v / 12);
+      b.m = Array(12).fill(part); b.m[11] = round(v - part * 11, b.cur); save(); render(); toast('Total réparti sur 12 mois'); break; }
+    case 'bcopy':
+      if (confirm(`Remplacer le budget ${ui.by} par une copie du budget ${ui.by-1} ?`)){ S.budgets[ui.by] = JSON.parse(JSON.stringify(S.budgets[ui.by-1])); save(); render(); } break;
+    case 'goaladd': openGoal(); break;
+    case 'goaledit': openGoal(id); break;
+    case 'goalsave': saveGoal(id); break;
+    case 'goaldel': if (confirm('Supprimer cet objectif ?')){ S.goals = S.goals.filter(g => g.id !== id); save(); closeSheet(); render(); } break;
+    case 'sprev': ui.sy--; render(); break;
+    case 'snext': ui.sy++; render(); break;
+    case 'catadd': openCat(); break;
+    case 'catedit': openCat(c); break;
+    case 'catsave': saveCat(c); break;
+    case 'catdel': if (confirm('Supprimer cette catégorie ?')){ S.cats = S.cats.filter(x => x.id !== c); Object.values(S.budgets).forEach(y => delete y[c]); save(); closeSheet(); render(); } break;
+    case 'export': doExport(); break;
+    case 'import': $('#imp').click(); break;
+    case 'reset': if (confirm('Effacer toutes les données ? Exporte une sauvegarde avant si besoin.') && confirm('Vraiment tout effacer ?')){ S = defaultState(); save(); render(); } break;
+  }
+});
+function onField(e){
+  const t = e.target, d = t.dataset;
+  if (d.bm !== undefined){
+    const b = getB(ui.by, d.cat); b.m[+d.bm] = num(t.value); saveSoon();
+    const tot = b.m.reduce((a,v) => a + (v||0), 0);
+    const el = document.querySelector(`[data-btot="${d.cat}"]`); if (el) el.textContent = tot ? fIn(tot, b.cur) + ' / an' : '—';
+    $('#bsum').innerHTML = renderBsum(ui.by);
+  } else if (d.bcur){
+    const b = getB(ui.by, d.bcur), to = t.value;
+    if (b.cur !== to){ b.m = b.m.map(v => v ? round(fromCFA(toCFA(v, b.cur), to), to) : 0); b.cur = to; save(); render(); toast('Montants convertis en ' + (to === 'EUR' ? 'EUR' : 'FCFA')); }
+  } else if (d.sim){
+    S.sim[d.sim] = t.value; saveSoon(); $('#simres').innerHTML = renderSimRes();
+  } else if (d.gsim){
+    const g = S.goals.find(x => x.id === d.gsim), v = num(t.value), out = $('#gsr-' + d.gsim);
+    if (!v){ out.textContent = ''; return; }
+    const st = goalStat(g); out.innerHTML = 'Objectif atteint ' + reachTxt(monthsTo(st.reste, toCFA(v, g.cur)));
+  } else if (t.id === 'f-amt'){ updConv(); }
+  else if (t.id === 'f-cur'){ manualCur = true; updConv(); }
+  else if (t.id === 'f-cat' && e.type === 'change'){
+    if (!manualCur){ const c = cat(t.value); if (c){ setSeg('f-cur', c.cur); updConv(); } }
+  }
+}
+document.addEventListener('input', onField);
+document.addEventListener('change', e => {
+  if (e.target.id === 'imp'){ const f = e.target.files[0]; if (f) doImport(f); e.target.value = ''; return; }
+  if (e.target.tagName === 'SELECT') onField(e);
+});
+
+/* ---------- Démarrage ---------- */
+(function icon(){ try {
+  const c = document.createElement('canvas'); c.width = c.height = 180; const x = c.getContext('2d');
+  x.fillStyle = '#0f5c4d'; x.fillRect(0,0,180,180); x.fillStyle = '#fff'; x.font = 'bold 62px -apple-system,Helvetica,Arial';
+  x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('F€', 90, 94);
+  const l = document.createElement('link'); l.rel = 'apple-touch-icon'; l.href = c.toDataURL('image/png'); document.head.appendChild(l);
+} catch(e){} })();
+load();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+render();
+window.__budget = {get S(){ return S; }, ui, render, RATE};
+})();
+</script>
+</body>
+</html>
